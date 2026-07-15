@@ -7,3 +7,7 @@ desktop.ini
 .gemini/
 .agents/
 .claude/
+
+# Uncompressed image sources (kept locally, only optimized exports are committed)
+WebPage Banner.png
+banner.png

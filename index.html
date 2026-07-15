@@ -451,12 +451,58 @@
   }
 
   #importFile { display: none; }
+
+  /* ---------- Hero banner ---------- */
+  .hero-banner {
+    height: clamp(180px, 26vw, 320px);
+    background-image:
+      linear-gradient(180deg, rgba(10,8,7,0.20) 0%, rgba(10,8,7,0.70) 68%, var(--bg) 100%),
+      url("banner.webp");
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+  }
+  .hero-content {
+    padding: 0 clamp(16px, 4vw, 40px) 22px;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .hero-eyebrow {
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255,255,255,0.75);
+    margin-bottom: 8px;
+  }
+  .hero-title {
+    font-size: clamp(22px, 3.6vw, 34px);
+    color: #fff;
+    max-width: 30ch;
+    line-height: 1.1;
+    text-wrap: balance;
+  }
+  .hero-tag {
+    margin-top: 8px;
+    font-size: 12px;
+    letter-spacing: 0.08em;
+    color: rgba(255,255,255,0.55);
+  }
 </style>
 </head>
 <body>
 
+<div class="hero-banner">
+  <div class="hero-content">
+    <div class="hero-eyebrow">SPACE AGE &mdash; OPERATIONS LOG</div>
+    <div class="hero-title display">Rome Wasn&rsquo;t Built In A Day But Our Space Program Was</div>
+    <div class="hero-tag mono">RWBIADBOSPW</div>
+  </div>
+</div>
+
 <header class="top">
-  <div class="eyebrow">ROME WASN&rsquo;T BUILT IN A DAY BUT OUR SPACE PROGRAM WAS (RWBIADBOSPW) &mdash; SPACE AGE OPERATIONS LOG</div>
   <div class="header-row">
     <div>
       <h1 id="planetTitle">VULCANUS</h1>
