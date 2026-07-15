@@ -174,7 +174,7 @@ When ready to implement this in `index.html`, the following changes should be ma
 ### Step A: Define Web App URL
 Replace or append the Web App URL config at the top of `<script>`:
 ```javascript
-var SCRIPT_URL = "YOUR_DEPLOYED_WEB_APP_URL_HERE";
+var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbze7v67gF3CHFkYt7GOpNiS3KuIuLamFKuGhSwcdrCpfVrJy3a5p-jOn_ke4Roogrt8jw/exec";
 ```
 
 ### Step B: Replace Load/Save State Logic

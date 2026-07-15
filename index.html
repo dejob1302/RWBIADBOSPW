@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RWBIADBOSPW — Space Age Operations Log</title>
+<style>
+  :root {
+    --bg: #14110f;
+    --bg-elevated: #1e1a17;
+    --bg-inset: #0d0b0a;
+    --text: #ece5da;
+    --text-dim: #a89b8c;
+    --text-faint: #6f6459;
+    --border: rgba(236,229,218,0.10);
+    --border-strong: rgba(236,229,218,0.18);
+    --accent: #ff6a2b;
+    --accent-strong: #ff8a4c;
+    --amber: #f2b33d;
+    --danger: #e0483a;
+    --tungsten: #7c93a3;
+    --success: #5cb87a;
+    --shadow: 0 8px 24px rgba(0,0,0,0.35);
+  }
+  :root[data-theme="light"] {
+    --bg: #efe9df;
+    --bg-elevated: #f8f4ec;
+    --bg-inset: #e3dccd;
+    --text: #201b15;
+    --text-dim: #5b5147;
+    --text-faint: #8a8074;
+    --border: rgba(31,26,21,0.10);
+    --border-strong: rgba(31,26,21,0.18);
+    --accent: #d9480f;
+    --accent-strong: #b8380a;
+    --amber: #a3690a;
+    --danger: #b83224;
+    --tungsten: #46626f;
+    --success: #2f8f52;
+    --shadow: 0 8px 24px rgba(31,26,21,0.12);
+  }
+  @media (prefers-color-scheme: light) {
+    :root:not([data-theme="dark"]) {
+      --bg: #efe9df;
+      --bg-elevated: #f8f4ec;
+      --bg-inset: #e3dccd;
+      --text: #201b15;
+      --text-dim: #5b5147;
+      --text-faint: #8a8074;
+      --border: rgba(31,26,21,0.10);
+      --border-strong: rgba(31,26,21,0.18);
+      --accent: #d9480f;
+      --accent-strong: #b8380a;
+      --amber: #a3690a;
+      --danger: #b83224;
+      --tungsten: #46626f;
+      --success: #2f8f52;
+      --shadow: 0 8px 24px rgba(31,26,21,0.12);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+    line-height: 1.45;
+  }
+  h1, h2, h3, .display {
+    font-family: "Bahnschrift", "Roboto Condensed", "Arial Narrow", sans-serif;
+    font-stretch: condensed;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    text-wrap: balance;
+    margin: 0;
+  }
+  .mono {
+    font-family: "Cascadia Mono", "Consolas", "SFMono-Regular", Menlo, monospace;
+    font-variant-numeric: tabular-nums;
+  }
+  a { color: var(--accent-strong); }
+  button {
+    font-family: inherit;
+    cursor: pointer;
+  }
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .bar-fill, .task-row, .planet-tab { transition: all 160ms ease; }
+  }
+
+  /* ---------- Header ---------- */
+  header.top {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 20px clamp(16px, 4vw, 40px) 0;
+  }
+  .eyebrow {
+    font-family: "Cascadia Mono", "Consolas", monospace;
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+    margin-bottom: 6px;
+  }
+  .heat-rule {
+    height: 3px;
+    margin-top: 16px;
+    background: linear-gradient(90deg, var(--danger), var(--accent) 35%, var(--amber) 75%, transparent);
+  }
+  .header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .header-row h1 {
+    font-size: clamp(32px, 5vw, 48px);
+    color: var(--text);
+  }
+  .header-row .sub {
+    color: var(--text-dim);
+    font-size: 15px;
+    margin-top: 4px;
+    max-width: 52ch;
+  }
+  .stat-block {
+    text-align: right;
+    min-width: 200px;
+  }
+  .stat-block .big {
+    font-size: 40px;
+    font-weight: 700;
+    color: var(--accent-strong);
+    line-height: 1;
+  }
+  .stat-block .frac {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .overall-bar {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--bg-inset);
+    overflow: hidden;
+    margin-top: 14px;
+    border: 1px solid var(--border);
+  }
+  .overall-bar .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--danger), var(--accent) 60%, var(--amber));
+    border-radius: 4px;
+  }
+
+  /* ---------- Planet tabs ---------- */
+  .planet-tabs {
+    display: flex;
+    gap: 6px;
+    margin: 18px 0 0;
+    overflow-x: auto;
+  }
+  .planet-tab {
+    background: none;
+    border: 1px solid var(--border);
+    border-bottom: none;
+    color: var(--text-dim);
+    padding: 9px 16px;
+    border-radius: 8px 8px 0 0;
+    font-family: "Bahnschrift", "Roboto Condensed", sans-serif;
+    font-stretch: condensed;
+    font-size: 14px;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .planet-tab .pill {
+    font-family: "Cascadia Mono", monospace;
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: var(--bg-inset);
+    color: var(--text-faint);
+  }
+  .planet-tab.is-active {
+    background: var(--bg-elevated);
+    color: var(--text);
+    border-color: var(--border-strong);
+  }
+  .planet-tab.is-active .pill {
+    background: var(--accent);
+    color: #1a0e06;
+  }
+  .planet-tab.is-complete .pill {
+    background: var(--success);
+    color: #08210f;
+  }
+  .planet-tab:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* ---------- Toolbar ---------- */
+  .toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 14px clamp(16px, 4vw, 40px);
+    background: var(--bg-elevated);
+    border-bottom: 1px solid var(--border);
+    flex-wrap: wrap;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    font-size: 12px;
+    color: var(--text-dim);
+  }
+  .legend .dot {
+    display: inline-block;
+    width: 9px;
+    height: 9px;
+    border-radius: 2px;
+    margin-right: 6px;
+  }
+  .actions {
+    display: flex;
+    gap: 8px;
+  }
+  .btn {
+    background: var(--bg-inset);
+    border: 1px solid var(--border-strong);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 6px;
+    font-size: 12.5px;
+  }
+  .btn:hover { border-color: var(--accent); }
+  .btn.danger:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* ---------- Main ---------- */
+  main {
+    padding: 24px clamp(16px, 4vw, 40px) 60px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+  .updated-note {
+    color: var(--text-faint);
+    font-size: 12px;
+    margin-bottom: 18px;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 18px;
+  }
+  .card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .card-header {
+    padding: 16px 18px 14px;
+    border-bottom: 1px solid var(--border);
+  }
+  .card-header .title-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+  }
+  .card-header h2 {
+    font-size: 20px;
+  }
+  .card-header .count {
+    color: var(--text-dim);
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .card-header .blurb {
+    color: var(--text-dim);
+    font-size: 13px;
+    margin-top: 4px;
+  }
+  .card-bar {
+    height: 5px;
+    border-radius: 3px;
+    background: var(--bg-inset);
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .card-bar .bar-fill { height: 100%; background: var(--accent); }
+
+  .tracks { padding: 4px 18px 10px; }
+  .track { margin-top: 14px; }
+  .track-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--track-color);
+    font-weight: 600;
+    border-left: 3px solid var(--track-color);
+    padding-left: 8px;
+  }
+  .track-build   { --track-color: var(--tungsten); }
+  .track-power   { --track-color: var(--amber); }
+  .track-defense { --track-color: var(--danger); }
+  .track-research{ --track-color: var(--accent); }
+
+  .task-list {
+    list-style: none;
+    margin: 8px 0 0;
+    padding: 0 0 0 11px;
+    border-left: 3px solid transparent;
+  }
+  .task-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 5px 4px;
+    border-radius: 5px;
+  }
+  .task-row:hover { background: var(--bg-inset); }
+  .task-row input[type="checkbox"] {
+    margin-top: 3px;
+    accent-color: var(--track-color);
+    width: 15px;
+    height: 15px;
+    flex-shrink: 0;
+  }
+  .task-row label {
+    flex: 1;
+    font-size: 13.5px;
+    cursor: pointer;
+  }
+  .task-row.done label {
+    color: var(--text-faint);
+    text-decoration: line-through;
+  }
+  .task-row .del {
+    background: none;
+    border: none;
+    color: var(--text-faint);
+    font-size: 15px;
+    line-height: 1;
+    padding: 2px 4px;
+    opacity: 0;
+    border-radius: 4px;
+  }
+  .task-row:hover .del { opacity: 1; }
+  .task-row .del:hover { color: var(--danger); }
+
+  .add-task {
+    display: flex;
+    gap: 6px;
+    margin-top: 7px;
+    padding-left: 11px;
+  }
+  .add-task input {
+    flex: 1;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 5px;
+    padding: 6px 9px;
+    font-size: 13px;
+    font-family: inherit;
+  }
+  .add-task input:focus { border-color: var(--accent); }
+  .add-task button {
+    background: var(--bg-inset);
+    border: 1px solid var(--border-strong);
+    color: var(--text-dim);
+    border-radius: 5px;
+    padding: 0 12px;
+    font-size: 15px;
+  }
+  .add-task button:hover { color: var(--accent-strong); border-color: var(--accent); }
+
+  .notes {
+    margin: 14px 18px 18px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border);
+  }
+  .notes summary {
+    cursor: pointer;
+    font-size: 12px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--text-faint);
+  }
+  .notes textarea {
+    width: 100%;
+    min-height: 64px;
+    margin-top: 8px;
+    background: var(--bg-inset);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-family: inherit;
+    font-size: 13px;
+    resize: vertical;
+  }
+  .notes textarea:focus { border-color: var(--accent); }
+
+  .placeholder-panel {
+    background: var(--bg-elevated);
+    border: 1px dashed var(--border-strong);
+    border-radius: 10px;
+    padding: 40px;
+    text-align: center;
+    color: var(--text-dim);
+  }
+  .placeholder-panel h2 { color: var(--text); margin-bottom: 8px; }
+  .placeholder-panel .pill {
+    display: inline-block;
+    margin-top: 14px;
+    font-family: "Cascadia Mono", monospace;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: var(--bg-inset);
+    color: var(--text-faint);
+  }
+
+  #importFile { display: none; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="eyebrow">ROME WASN&rsquo;T BUILT IN A DAY BUT OUR SPACE PROGRAM WAS (RWBIADBOSPW) &mdash; SPACE AGE OPERATIONS LOG</div>
+  <div class="header-row">
+    <div>
+      <h1 id="planetTitle">VULCANUS</h1>
+      <div class="sub" id="planetSub">Establishing a stable, defended foothold: molten metal, tungsten, and enough Tesla coils to keep the demolishers off our foundries.</div>
+    </div>
+    <div class="stat-block">
+      <div class="big mono"><span id="overallPct">0%</span></div>
+      <div class="frac mono" id="overallFrac">0 / 0 tasks</div>
+      <div class="overall-bar"><div class="bar-fill" id="overallBar" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="planet-tabs" id="planetTabs"></div>
+</header>
+
+<div class="toolbar">
+  <div class="legend">
+    <span><span class="dot" style="background:var(--tungsten)"></span>Build &amp; Logistics</span>
+    <span><span class="dot" style="background:var(--amber)"></span>Power &amp; Resources</span>
+    <span><span class="dot" style="background:var(--danger)"></span>Defense</span>
+    <span><span class="dot" style="background:var(--accent)"></span>Research</span>
+  </div>
+  <div class="actions">
+    <button class="btn" id="themeToggle">Toggle theme</button>
+    <button class="btn" id="exportBtn">Export progress</button>
+    <button class="btn" id="importBtn">Import progress</button>
+    <input type="file" id="importFile" accept="application/json">
+    <button class="btn danger" id="resetBtn">Reset planet</button>
+  </div>
+</div>
+
+<main>
+  <div class="updated-note" id="updatedNote"></div>
+  <div id="content"></div>
+</main>
+
+<script>
+(function () {
+  "use strict";
+
+  var STORAGE_KEY = "spaceAgeTracker.v1";
+  var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbze7v67gF3CHFkYt7GOpNiS3KuIuLamFKuGhSwcdrCpfVrJy3a5p-jOn_ke4Roogrt8jw/exec";
+
+  var PLANETS = {
+    nauvis: {
+      name: "Nauvis",
+      status: "complete",
+      note: "Automated. Mostly. Rocket's already fired — on to the next thing."
+    },
+    vulcanus: {
+      name: "Vulcanus",
+      status: "active",
+      projects: [
+        {
+          id: "landing",
+          title: "Landing & Survey",
+          blurb: "Get boots on lava rock and figure out what we're working with.",
+          tracks: {
+            build: [
+              "Land rocket/space platform and unload starting equipment",
+              "Clear an initial build footprint away from active lava flows",
+              "Lay first logistics/chest network for the starter base"
+            ],
+            power: [
+              "Deploy a solar panel array — Vulcanus has no natural water, so steam power isn't an option",
+              "Add accumulators to buffer the night cycle",
+              "Survey nearby resource patches: tungsten, calcite, coal, sulfuric acid lakes"
+            ],
+            defense: [
+              "Scout demolisher territory and migration routes near the landing site",
+              "Pick a base perimeter that isn't sitting on a demolisher path",
+              "Place basic gun turrets as an initial deterrent"
+            ],
+            research: [
+              "Confirm starter research queue and bring forward any Nauvis-parity techs we're missing"
+            ]
+          }
+        },
+        {
+          id: "foundry",
+          title: "Molten Metal Foundry",
+          blurb: "Move iron and copper production onto molten metal and casting recipes.",
+          tracks: {
+            research: [
+              "Research Foundry",
+              "Research casting recipes (gear wheels, pipes, low density structure, steel)"
+            ],
+            build: [
+              "Construct a Foundry cluster for molten iron",
+              "Construct a Foundry cluster for molten copper",
+              "Convert key production lines over to cast intermediates",
+              "Keep foundry clusters compact — molten metal doesn't pipe well over distance"
+            ],
+            power: [
+              "Scale up power generation for the Foundry cluster (Foundries draw heavily)"
+            ]
+          }
+        },
+        {
+          id: "tungsten",
+          title: "Tungsten & Big Mining Drill",
+          blurb: "Unlock the planet's signature ore and the drill built for it.",
+          tracks: {
+            research: [
+              "Research tungsten smelting & tungsten carbide",
+              "Research Big Mining Drill"
+            ],
+            build: [
+              "Deploy Big Mining Drills on tungsten/iron/copper patches",
+              "Set up a tungsten plate production line",
+              "Route tungsten carbide to wherever it's consumed (drills, high-tier tools)"
+            ]
+          }
+        },
+        {
+          id: "science",
+          title: "Metallurgic Science",
+          blurb: "Get the local science pack flowing and pick the research order.",
+          tracks: {
+            build: [
+              "Build a Metallurgic science pack production line",
+              "Expand the lab cluster to consume the new pack"
+            ],
+            research: [
+              "Set research priority order for the Vulcanus tech tree",
+              "Flag any science packs we still need to import from Nauvis"
+            ]
+          }
+        },
+        {
+          id: "defense",
+          title: "Demolisher Defense",
+          blurb: "The worms are the real boss fight. Don't skip this one.",
+          tracks: {
+            research: [
+              "Research Tesla turret & Tesla ammo"
+            ],
+            defense: [
+              "Build a perimeter wall around the base",
+              "Ring the perimeter with Tesla turrets",
+              "Add radar coverage for early demolisher warning",
+              "Agree rules of engagement — avoid provoking demolishers unless we have to clear a path"
+            ],
+            power: [
+              "Make sure turret power draw doesn't brown out the base mid-attack"
+            ]
+          }
+        },
+        {
+          id: "chemical",
+          title: "Sulfuric Acid & Chemical Chain",
+          blurb: "Vulcanus's acid lakes are free fluid — use them.",
+          tracks: {
+            build: [
+              "Pump the native sulfuric acid lakes",
+              "Build out the chemical plant chain (batteries, plastic, etc.)",
+              "Add storage tanks and pipe the chain into the main base"
+            ]
+          }
+        },
+        {
+          id: "outbound",
+          title: "Outbound Logistics",
+          blurb: "Make sure Vulcanus feeds the rest of the run, not just itself.",
+          tracks: {
+            build: [
+              "Set up an outbound space platform/silo for Vulcanus exports",
+              "Set up an import list for anything Vulcanus can't produce locally",
+              "Establish a regular export of tungsten plates / foundry goods back to Nauvis"
+            ],
+            research: [
+              "Research advanced rocket/thruster fuel components made from Vulcanus resources"
+            ]
+          }
+        }
+      ]
+    },
+    fulgora: { name: "Fulgora", status: "locked" },
+    gleba:   { name: "Gleba",   status: "locked" },
+    aquilo:  { name: "Aquilo",  status: "locked" }
+  };
+
+  var TRACK_META = {
+    build:    { label: "Build & Logistics" },
+    power:    { label: "Power & Resources" },
+    defense:  { label: "Defense" },
+    research: { label: "Research" }
+  };
+  var TRACK_ORDER = ["research", "build", "power", "defense"];
+
+  var state = { checked: {}, removed: {}, custom: {}, notes: {}, lastUpdated: null };
+  var activePlanet = "vulcanus";
+
+  function loadLocalState() {
+    var raw;
+    try { raw = localStorage.getItem(STORAGE_KEY); } catch (e) { raw = null; }
+    var s = raw ? JSON.parse(raw) : {};
+    s.checked = s.checked || {};
+    s.removed = s.removed || {};
+    s.custom = s.custom || {};
+    s.notes = s.notes || {};
+    s.lastUpdated = s.lastUpdated || null;
+    return s;
+  }
+
+  function loadStateFromCloud(callback) {
+    if (!SCRIPT_URL) {
+      state = loadLocalState();
+      activePlanet = state.activePlanet || "vulcanus";
+      callback();
+      return;
+    }
+    
+    var note = document.getElementById("updatedNote");
+    if (note) note.textContent = "Loading progress from cloud...";
+
+    fetch(SCRIPT_URL)
+      .then(function (r) { return r.json(); })
+      .then(function (data) {
+        state = data || {};
+        state.checked = state.checked || {};
+        state.removed = state.removed || {};
+        state.custom = state.custom || {};
+        state.notes = state.notes || {};
+        state.lastUpdated = state.lastUpdated || null;
+        activePlanet = state.activePlanet || "vulcanus";
+        callback();
+      })
+      .catch(function (err) {
+        console.error("Cloud load failed, using local storage:", err);
+        state = loadLocalState();
+        activePlanet = state.activePlanet || "vulcanus";
+        callback();
+      });
+  }
+
+  function saveState() {
+    state.lastUpdated = new Date().toISOString();
+    state.activePlanet = activePlanet;
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+    renderUpdatedNote();
+
+    if (SCRIPT_URL) {
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        mode: "no-cors",
+        headers: {
+          "Content-Type": "text/plain"
+        },
+        body: JSON.stringify(state)
+      })
+      .then(function () {
+        console.log("State synced to Google Sheets successfully.");
+      })
+      .catch(function (err) {
+        console.error("Failed to sync state to Google Sheets:", err);
+      });
+    }
+  }
+
+  function taskId(planetId, projectId, trackKey, idx) {
+    return planetId + "." + projectId + "." + trackKey + "." + idx;
+  }
+  function customBucketKey(planetId, projectId, trackKey) {
+    return planetId + "." + projectId + "." + trackKey;
+  }
+
+  function getTracksForProject(planet, planetId, project) {
+    var out = [];
+    TRACK_ORDER.forEach(function (trackKey) {
+      var defaults = (project.tracks[trackKey] || []).map(function (text, idx) {
+        return { id: taskId(planetId, project.id, trackKey, idx), text: text, custom: false };
+      }).filter(function (t) { return !state.removed[t.id]; });
+
+      var bucket = customBucketKey(planetId, project.id, trackKey);
+      var customTasks = (state.custom[bucket] || []);
+
+      var all = defaults.concat(customTasks);
+      if (all.length) out.push({ key: trackKey, label: TRACK_META[trackKey].label, tasks: all, bucket: bucket });
+    });
+    return out;
+  }
+
+  function countProject(planet, planetId, project) {
+    var total = 0, done = 0;
+    getTracksForProject(planet, planetId, project).forEach(function (t) {
+      t.tasks.forEach(function (task) {
+        total++;
+        if (state.checked[task.id]) done++;
+      });
+    });
+    return { total: total, done: done };
+  }
+
+  function renderPlanetTabs() {
+    var el = document.getElementById("planetTabs");
+    el.innerHTML = "";
+    Object.keys(PLANETS).forEach(function (pid) {
+      var p = PLANETS[pid];
+      var btn = document.createElement("button");
+      btn.className = "planet-tab" + (pid === activePlanet ? " is-active" : "") + (p.status === "complete" ? " is-complete" : "");
+      var pillText = p.status === "complete" ? "Done" : p.status === "active" ? "Active" : "Locked";
+      btn.innerHTML = '<span>' + p.name + '</span><span class="pill">' + pillText + '</span>';
+      btn.addEventListener("click", function () {
+        activePlanet = pid;
+        saveState();
+        renderAll();
+      });
+      el.appendChild(btn);
+    });
+  }
+
+  function renderHeaderStats() {
+    var planet = PLANETS[activePlanet];
+    document.getElementById("planetTitle").textContent = planet.name.toUpperCase();
+
+    if (planet.status !== "active") {
+      document.getElementById("planetSub").textContent =
+        planet.status === "complete"
+          ? "Landing site secured. Automation running."
+          : "Not yet reachable — nothing tracked here.";
+      document.getElementById("overallPct").textContent = "—";
+      document.getElementById("overallFrac").textContent = "";
+      document.getElementById("overallBar").style.width = "0%";
+      return;
+    }
+    document.getElementById("planetSub").textContent =
+      "Establishing a stable, defended foothold: molten metal, tungsten, and enough Tesla coils to keep the demolishers off our foundries.";
+
+    var total = 0, done = 0;
+    planet.projects.forEach(function (proj) {
+      var c = countProject(planet, activePlanet, proj);
+      total += c.total; done += c.done;
+    });
+    var pct = total ? Math.round((done / total) * 100) : 0;
+    document.getElementById("overallPct").textContent = pct + "%";
+    document.getElementById("overallFrac").textContent = done + " / " + total + " tasks";
+    document.getElementById("overallBar").style.width = pct + "%";
+  }
+
+  function renderUpdatedNote() {
+    var note = document.getElementById("updatedNote");
+    if (!state.lastUpdated) { note.textContent = ""; return; }
+    var d = new Date(state.lastUpdated);
+    note.textContent = "Last updated " + d.toLocaleString();
+  }
+
+  function renderContent() {
+    var planet = PLANETS[activePlanet];
+    var content = document.getElementById("content");
+    content.innerHTML = "";
+
+    if (planet.status !== "active") {
+      var panel = document.createElement("div");
+      panel.className = "placeholder-panel";
+      if (planet.status === "complete") {
+        panel.innerHTML = "<h2>" + planet.name + " — foothold established</h2><p>" + planet.note + "</p><div class=\"pill\">No open tasks</div>";
+      } else {
+        panel.innerHTML = "<h2>" + planet.name + " is locked</h2><p>Unlocks once the Vulcanus foothold is stable. Nothing tracked here yet — come back after launch.</p><div class=\"pill\">0 tasks defined</div>";
+      }
+      content.appendChild(panel);
+      return;
+    }
+
+    var grid = document.createElement("div");
+    grid.className = "grid";
+
+    planet.projects.forEach(function (proj) {
+      grid.appendChild(renderProjectCard(planet, proj));
+    });
+
+    content.appendChild(grid);
+  }
+
+  function renderProjectCard(planet, proj) {
+    var card = document.createElement("div");
+    card.className = "card";
+
+    var counts = countProject(planet, activePlanet, proj);
+    var pct = counts.total ? Math.round((counts.done / counts.total) * 100) : 0;
+
+    var header = document.createElement("div");
+    header.className = "card-header";
+    header.innerHTML =
+      '<div class="title-row"><h2>' + proj.title + '</h2>' +
+      '<div class="count mono">' + counts.done + '/' + counts.total + '</div></div>' +
+      '<div class="blurb">' + proj.blurb + '</div>' +
+      '<div class="card-bar"><div class="bar-fill" style="width:' + pct + '%"></div></div>';
+    card.appendChild(header);
+
+    var tracksWrap = document.createElement("div");
+    tracksWrap.className = "tracks";
+
+    getTracksForProject(planet, activePlanet, proj).forEach(function (track) {
+      tracksWrap.appendChild(renderTrack(proj, track));
+    });
+
+    card.appendChild(tracksWrap);
+    card.appendChild(renderNotes(proj));
+
+    return card;
+  }
+
+  function renderTrack(proj, track) {
+    var wrap = document.createElement("div");
+    wrap.className = "track track-" + track.key;
+
+    var head = document.createElement("div");
+    head.className = "track-header";
+    head.textContent = track.label;
+    wrap.appendChild(head);
+
+    var list = document.createElement("ul");
+    list.className = "task-list";
+
+    track.tasks.forEach(function (task) {
+      var li = document.createElement("li");
+      li.className = "task-row" + (state.checked[task.id] ? " done" : "");
+
+      var cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = !!state.checked[task.id];
+      var inputId = "cb_" + task.id.replace(/[^a-zA-Z0-9]/g, "_");
+      cb.id = inputId;
+      cb.addEventListener("change", function () {
+        if (cb.checked) state.checked[task.id] = true;
+        else delete state.checked[task.id];
+        saveState();
+        renderAll();
+      });
+
+      var label = document.createElement("label");
+      label.setAttribute("for", inputId);
+      label.textContent = task.text;
+
+      var del = document.createElement("button");
+      del.className = "del";
+      del.type = "button";
+      del.title = "Remove task";
+      del.textContent = "×";
+      del.addEventListener("click", function () {
+        if (task.custom) {
+          var arr = state.custom[track.bucket] || [];
+          state.custom[track.bucket] = arr.filter(function (t) { return t.id !== task.id; });
+        } else {
+          state.removed[task.id] = true;
+        }
+        delete state.checked[task.id];
+        saveState();
+        renderAll();
+      });
+
+      li.appendChild(cb);
+      li.appendChild(label);
+      li.appendChild(del);
+      list.appendChild(li);
+    });
+
+    wrap.appendChild(list);
+
+    var form = document.createElement("form");
+    form.className = "add-task";
+    form.innerHTML = '<input type="text" placeholder="Add a task…" aria-label="Add a task to ' + track.label + '"><button type="submit">+</button>';
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var input = form.querySelector("input");
+      var val = input.value.trim();
+      if (!val) return;
+      var id = track.bucket + ".custom." + Date.now() + "." + Math.floor(Math.random() * 1000);
+      state.custom[track.bucket] = state.custom[track.bucket] || [];
+      state.custom[track.bucket].push({ id: id, text: val });
+      input.value = "";
+      saveState();
+      renderAll();
+    });
+    wrap.appendChild(form);
+
+    return wrap;
+  }
+
+  function renderNotes(proj) {
+    var details = document.createElement("details");
+    details.className = "notes";
+    var summary = document.createElement("summary");
+    summary.textContent = "Notes";
+    details.appendChild(summary);
+
+    var key = activePlanet + "." + proj.id;
+    if (state.notes[key]) details.open = true;
+
+    var textarea = document.createElement("textarea");
+    textarea.placeholder = "Anything worth remembering — coordinates, blockers, who's on it…";
+    textarea.value = state.notes[key] || "";
+    textarea.addEventListener("change", function () {
+      if (textarea.value.trim()) state.notes[key] = textarea.value;
+      else delete state.notes[key];
+      saveState();
+    });
+    details.appendChild(textarea);
+    return details;
+  }
+
+  function renderAll() {
+    renderPlanetTabs();
+    renderHeaderStats();
+    renderContent();
+    renderUpdatedNote();
+  }
+
+  // ---------- Toolbar actions ----------
+  document.getElementById("themeToggle").addEventListener("click", function () {
+    var root = document.documentElement;
+    var current = root.getAttribute("data-theme");
+    var prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next;
+    if (!current) next = prefersDark ? "light" : "dark";
+    else next = current === "dark" ? "light" : "dark";
+    root.setAttribute("data-theme", next);
+    try { localStorage.setItem("spaceAgeTracker.theme", next); } catch (e) {}
+  });
+  (function initTheme() {
+    var saved;
+    try { saved = localStorage.getItem("spaceAgeTracker.theme"); } catch (e) { saved = null; }
+    if (saved) document.documentElement.setAttribute("data-theme", saved);
+  })();
+
+  document.getElementById("exportBtn").addEventListener("click", function () {
+    var blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "space-age-progress-" + new Date().toISOString().slice(0, 10) + ".json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  });
+
+  document.getElementById("importBtn").addEventListener("click", function () {
+    document.getElementById("importFile").click();
+  });
+  document.getElementById("importFile").addEventListener("change", function (e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      try {
+        var imported = JSON.parse(reader.result);
+        state = {
+          checked: imported.checked || {},
+          removed: imported.removed || {},
+          custom: imported.custom || {},
+          notes: imported.notes || {},
+          lastUpdated: imported.lastUpdated || null,
+          activePlanet: imported.activePlanet
+        };
+        if (state.activePlanet && PLANETS[state.activePlanet]) activePlanet = state.activePlanet;
+        saveState();
+        renderAll();
+      } catch (err) {
+        alert("Couldn't read that file — is it a progress export from this tracker?");
+      }
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  });
+
+  document.getElementById("resetBtn").addEventListener("click", function () {
+    var planet = PLANETS[activePlanet];
+    if (!confirm("Reset all progress, notes, and custom tasks for " + planet.name + "? This can't be undone (unless you've exported a backup).")) return;
+    var prefix = activePlanet + ".";
+    Object.keys(state.checked).forEach(function (k) { if (k.indexOf(prefix) === 0) delete state.checked[k]; });
+    Object.keys(state.removed).forEach(function (k) { if (k.indexOf(prefix) === 0) delete state.removed[k]; });
+    Object.keys(state.custom).forEach(function (k) { if (k.indexOf(prefix) === 0) delete state.custom[k]; });
+    Object.keys(state.notes).forEach(function (k) { if (k.indexOf(prefix) === 0) delete state.notes[k]; });
+    saveState();
+    renderAll();
+  });
+
+  loadStateFromCloud(function () {
+    renderAll();
+  });
+})();
+</script>
+</body>
+</html>
