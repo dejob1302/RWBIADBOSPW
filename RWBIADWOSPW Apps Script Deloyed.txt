@@ -1,0 +1,107 @@
+/**
+ * Space Age Operations Log - Collaborative Backend
+ * Handles GET (load) and POST (save) requests from the HTML frontend.
+ */
+
+// Enable CORS for web requests
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName("RAW_DATA");
+  if (!sheet) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "RAW_DATA sheet not found" }))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  var jsonStr = sheet.getRange("A2").getValue();
+  if (!jsonStr || jsonStr.trim() === "") {
+    jsonStr = "{}";
+  }
+  
+  // Return the raw JSON string with CORS headers allowed by Apps Script ContentService
+  return ContentService.createTextOutput(jsonStr)
+                       .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var jsonString = "";
+  
+  if (e && e.postData && e.postData.contents) {
+    jsonString = e.postData.contents;
+  } else {
+    return ContentService.createTextOutput(JSON.stringify({ error: "No post content received" }))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  var state;
+  try {
+    state = JSON.parse(jsonString);
+  } catch (err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: "Invalid JSON format: " + err.message }))
+                         .setMimeType(ContentService.MimeType.JSON);
+  }
+  
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  
+  // 1. Save raw JSON state to the RAW_DATA sheet
+  var rawSheet = ss.getSheetByName("RAW_DATA") || ss.insertSheet("RAW_DATA");
+  rawSheet.getRange("A1").setValue("Raw State JSON");
+  rawSheet.getRange("A2").setValue(jsonString);
+  
+  // 2. Unpack JSON to update human-readable tabs
+  updateHumanReadableSheets(ss, state);
+  
+  return ContentService.createTextOutput(JSON.stringify({ success: true, updated: new Date().toISOString() }))
+                       .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Unpacks the JSON state into human-readable, read-only sheets for easy viewing
+ */
+function updateHumanReadableSheets(ss, state) {
+  // --- Tab 1: Overview ---
+  var overviewSheet = ss.getSheetByName("Overview") || ss.insertSheet("Overview");
+  overviewSheet.clear();
+  overviewSheet.appendRow(["Metric", "Value"]);
+  overviewSheet.appendRow(["Active Planet", state.activePlanet || "Nauvis"]);
+  overviewSheet.appendRow(["Last Updated", state.lastUpdated || new Date().toISOString()]);
+  overviewSheet.getRange("A1:B1").setFontWeight("bold").setBackground("#ece5da");
+
+  // --- Tab 2: Completed Tasks ---
+  var checksSheet = ss.getSheetByName("Completed Tasks") || ss.insertSheet("Completed Tasks");
+  checksSheet.clear();
+  checksSheet.appendRow(["Task ID", "Status", "Last Marked Complete"]);
+  checksSheet.getRange("A1:C1").setFontWeight("bold").setBackground("#d9480f").setFontColor("#ffffff");
+  if (state.checked) {
+    Object.keys(state.checked).forEach(function(key) {
+      if (state.checked[key]) {
+        checksSheet.appendRow([key, "COMPLETED", state.lastUpdated || ""]);
+      }
+    });
+  }
+
+  // --- Tab 3: Custom Tasks ---
+  var customSheet = ss.getSheetByName("Custom Tasks") || ss.insertSheet("Custom Tasks");
+  customSheet.clear();
+  customSheet.appendRow(["Bucket (Planet/Project/Track)", "Task ID", "Task Content"]);
+  customSheet.getRange("A1:C1").setFontWeight("bold").setBackground("#7c93a3").setFontColor("#ffffff");
+  if (state.custom) {
+    Object.keys(state.custom).forEach(function(bucketKey) {
+      var tasksList = state.custom[bucketKey] || [];
+      tasksList.forEach(function(t) {
+        customSheet.appendRow([bucketKey, t.id, t.text]);
+      });
+    });
+  }
+
+  // --- Tab 4: Planet Notes ---
+  var notesSheet = ss.getSheetByName("Notes") || ss.insertSheet("Notes");
+  notesSheet.clear();
+  notesSheet.appendRow(["Location Key", "Notes"]);
+  notesSheet.getRange("A1:B1").setFontWeight("bold").setBackground("#f2b33d");
+  if (state.notes) {
+    Object.keys(state.notes).forEach(function(key) {
+      if (state.notes[key] && state.notes[key].trim() !== "") {
+        notesSheet.appendRow([key, state.notes[key]]);
+      }
+    });
+  }
+}

@@ -206,6 +206,10 @@
     background: var(--success);
     color: #08210f;
   }
+  .planet-tab.is-ongoing .pill {
+    background: var(--amber);
+    color: #241a02;
+  }
   .planet-tab:disabled {
     opacity: 0.55;
     cursor: not-allowed;
@@ -498,12 +502,101 @@
   var PLANETS = {
     nauvis: {
       name: "Nauvis",
-      status: "complete",
-      note: "Automated. Mostly. Rocket's already fired — on to the next thing."
+      status: "ongoing",
+      subtitle: "The rocket flew, but the home base still has to survive, repair itself, and keep feeding the rest of the run.",
+      projects: [
+        {
+          id: "launch-audit",
+          title: "Rocket Launch Progression (Audit)",
+          blurb: "Revisit what actually got finished on the way to the first launch — nothing here is assumed done.",
+          tracks: {
+            research: [
+              "Confirm all core science packs (red/green/blue/military) are still being automated, not just running on an early stockpile",
+              "Confirm production science (purple) and utility science (yellow) automation is self-sustaining",
+              "Review the rocket part chain: low density structure, rocket fuel, rocket control unit"
+            ],
+            build: [
+              "Audit rocket silo throughput — can it sustain repeat launches, not just the first one?",
+              "Check oil processing / plastic / battery chains haven't bottlenecked as the base grew",
+              "Review early 'good enough' production lines that never got revisited (bare belts vs bots, missing modules)"
+            ]
+          }
+        },
+        {
+          id: "defense-hardening",
+          title: "Defense Hardening",
+          blurb: "Minigun turrets and plain walls won't hold against huge biters forever — close the gaps before they're breached.",
+          tracks: {
+            defense: [
+              "Survey the current perimeter for wall gaps or unwalled expansion edges",
+              "Upgrade gun/minigun turret lines to laser turrets where coverage is weakest",
+              "Add radar coverage around the perimeter for early attack warning",
+              "Stand up an artillery outpost (or artillery train) to push nests back instead of just turtling"
+            ],
+            research: [
+              "Check whether turret/wall/armor research has kept pace with current biter evolution, or is still early-game tier",
+              "Check whether pollution cleanup (efficiency modules, tree buffers) is holding evolution down, or quietly maxed out"
+            ],
+            build: [
+              "Upgrade player equipment (power armor, exoskeleton, personal roboport) for faster response to attacks"
+            ],
+            power: [
+              "Make sure defense structures have a power feed that survives a base-wide brownout"
+            ]
+          }
+        },
+        {
+          id: "auto-maintenance",
+          title: "Automated Maintenance",
+          blurb: "The base needs to look after itself while we're off-world — nobody's coming back to hand-repair a wall.",
+          tracks: {
+            build: [
+              "Extend roboport coverage over the full base and perimeter",
+              "Stock construction bots and repair packs so damaged walls/turrets self-heal",
+              "Set up a logistic bot network to auto-restock ammo to turrets"
+            ],
+            research: [
+              "Confirm robotics research (roboport, construction/logistic robots) is deployed, not just researched"
+            ]
+          }
+        },
+        {
+          id: "power-scaling",
+          title: "Power & Production Scaling",
+          blurb: "New production lines for Vulcanus-bound exports need power headroom we may not have.",
+          tracks: {
+            power: [
+              "Review whether solar + accumulators still cover current draw, or if it's time for nuclear",
+              "If going nuclear: confirm uranium mining/processing and the Kovarex enrichment chain",
+              "Check for brownouts during peak production or attack spikes"
+            ],
+            build: [
+              "Plan new production lines for anything Vulcanus needs shipped up (and anything Nauvis needs shipped back)",
+              "Standardize blueprints for new lines so they're repeatable, not one-off spaghetti"
+            ]
+          }
+        },
+        {
+          id: "logistics-hub",
+          title: "Interplanetary Logistics Hub",
+          blurb: "Nauvis is now a supply line, not just a finish line — it needs to run in both directions.",
+          tracks: {
+            build: [
+              "Build/verify a Cargo Landing Pad for return shipments from Vulcanus",
+              "Confirm the rocket silo can sustain a launch cadence, not just a single trip",
+              "Scale the rail/belt network for two-way traffic instead of one-way to the silo"
+            ],
+            research: [
+              "Prioritize any remaining research that unblocks Vulcanus (or future planets) over pure Nauvis growth"
+            ]
+          }
+        }
+      ]
     },
     vulcanus: {
       name: "Vulcanus",
       status: "active",
+      subtitle: "Establishing a stable, defended foothold: molten metal, tungsten, and enough Tesla coils to keep the demolishers off our foundries.",
       projects: [
         {
           id: "landing",
@@ -752,8 +845,11 @@
     Object.keys(PLANETS).forEach(function (pid) {
       var p = PLANETS[pid];
       var btn = document.createElement("button");
-      btn.className = "planet-tab" + (pid === activePlanet ? " is-active" : "") + (p.status === "complete" ? " is-complete" : "");
-      var pillText = p.status === "complete" ? "Done" : p.status === "active" ? "Active" : "Locked";
+      btn.className = "planet-tab"
+        + (pid === activePlanet ? " is-active" : "")
+        + (p.status === "complete" ? " is-complete" : "")
+        + (p.status === "ongoing" ? " is-ongoing" : "");
+      var pillText = p.status === "complete" ? "Done" : p.status === "active" ? "Active" : p.status === "ongoing" ? "Ongoing" : "Locked";
       btn.innerHTML = '<span>' + p.name + '</span><span class="pill">' + pillText + '</span>';
       btn.addEventListener("click", function () {
         activePlanet = pid;
@@ -768,18 +864,14 @@
     var planet = PLANETS[activePlanet];
     document.getElementById("planetTitle").textContent = planet.name.toUpperCase();
 
-    if (planet.status !== "active") {
-      document.getElementById("planetSub").textContent =
-        planet.status === "complete"
-          ? "Landing site secured. Automation running."
-          : "Not yet reachable — nothing tracked here.";
+    if (!planet.projects) {
+      document.getElementById("planetSub").textContent = "Not yet reachable — nothing tracked here.";
       document.getElementById("overallPct").textContent = "—";
       document.getElementById("overallFrac").textContent = "";
       document.getElementById("overallBar").style.width = "0%";
       return;
     }
-    document.getElementById("planetSub").textContent =
-      "Establishing a stable, defended foothold: molten metal, tungsten, and enough Tesla coils to keep the demolishers off our foundries.";
+    document.getElementById("planetSub").textContent = planet.subtitle || "";
 
     var total = 0, done = 0;
     planet.projects.forEach(function (proj) {
@@ -804,14 +896,10 @@
     var content = document.getElementById("content");
     content.innerHTML = "";
 
-    if (planet.status !== "active") {
+    if (!planet.projects) {
       var panel = document.createElement("div");
       panel.className = "placeholder-panel";
-      if (planet.status === "complete") {
-        panel.innerHTML = "<h2>" + planet.name + " — foothold established</h2><p>" + planet.note + "</p><div class=\"pill\">No open tasks</div>";
-      } else {
-        panel.innerHTML = "<h2>" + planet.name + " is locked</h2><p>Unlocks once the Vulcanus foothold is stable. Nothing tracked here yet — come back after launch.</p><div class=\"pill\">0 tasks defined</div>";
-      }
+      panel.innerHTML = "<h2>" + planet.name + " is locked</h2><p>Unlocks once the Vulcanus foothold is stable. Nothing tracked here yet — come back after launch.</p><div class=\"pill\">0 tasks defined</div>";
       content.appendChild(panel);
       return;
     }
